@@ -1,0 +1,266 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+// Abstract class
+abstract class Person {
+    protected String name;
+    protected int id;
+    
+    public Person(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+    
+    public abstract String getRole();
+    
+    public String getName() { return name; }
+    public int getId() { return id; }
+}
+
+// Student class - Encapsulation
+class Student extends Person {
+    private String course;
+    private double marks;
+    
+    public Student(int id, String name, String course, double marks) {
+        super(id, name);
+        this.course = course;
+        this.marks = marks;
+    }
+    
+    // Getters and setters
+    public String getCourse() { return course; }
+    public void setCourse(String course) { this.course = course; }
+    
+    public double getMarks() { return marks; }
+    public void setMarks(double marks) { this.marks = marks; }
+    
+    // Grade calculation
+    public String getGrade() {
+        if (marks >= 90) return "A";
+        else if (marks >= 80) return "B";
+        else if (marks >= 70) return "C";
+        else if (marks >= 60) return "D";
+        else return "F";
+    }
+    
+    @Override
+    public String getRole() {
+        return "Student";
+    }
+    
+    public String toString() {
+        return "ID: " + id + " | Name: " + name + " | Course: " + course + 
+               " | Marks: " + marks + " | Grade: " + getGrade();
+    }
+}
+
+// Course class
+class Course {
+    private String code;
+    private String title;
+    private int credits;
+    
+    public Course(String code, String title, int credits) {
+        this.code = code;
+        this.title = title;
+        this.credits = credits;
+    }
+    
+    public String getCode() { return code; }
+    public String getTitle() { return title; }
+    public int getCredits() { return credits; }
+    
+    public String toString() {
+        return code + " - " + title + " (" + credits + " credits)";
+    }
+}
+
+// Main application
+public class Main {
+    private ArrayList<Student> students;
+    private ArrayList<Course> courses;
+    private Scanner scanner;
+    
+    public Main() {
+        students = new ArrayList<>();
+        courses = new ArrayList<>();
+        scanner = new Scanner(System.in);
+        addSampleCourses();
+    }
+    
+    private void addSampleCourses() {
+        courses.add(new Course("CS101", "Computer Science", 4));
+        courses.add(new Course("MATH201", "Mathematics", 3));
+        courses.add(new Course("PHY101", "Physics", 4));
+        courses.add(new Course("ENG102", "English", 2));
+    }
+    
+    public void start() {
+        while (true) {
+            System.out.println("\n STUDENT MANAGEMENT SYSTEM ");
+            System.out.println("1.  New Student");
+            System.out.println("2.  All Students");
+            System.out.println("3. Search Student by ID");
+            System.out.println("4. Update Student Marks");
+            System.out.println("5. Delete Student");
+            System.out.println("6. View Available Courses");
+            System.out.println("7. Exit");
+            System.out.print("Enter your choice: ");
+            
+            String choice = scanner.nextLine();
+            
+            if (choice.equals("1")) {
+                addStudent();
+            } else if (choice.equals("2")) {
+                viewAllStudents();
+            } else if (choice.equals("3")) {
+                searchStudent();
+            } else if (choice.equals("4")) {
+                updateMarks();
+            } else if (choice.equals("5")) {
+                deleteStudent();
+            } else if (choice.equals("6")) {
+                showCourses();
+            } else if (choice.equals("7")) {
+                System.out.println("Goodbye!");
+                break;
+            } else {
+                System.out.println("Invalid choice!");
+            }
+        }
+        scanner.close();
+    }
+    
+    private void addStudent() {
+        System.out.println("\n---  NEW STUDENT ---");
+        
+        System.out.print("Enter Student ID: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        
+        // Check if ID exists
+        for (Student s : students) {
+            if (s.getId() == id) {
+                System.out.println("Name already exists!");
+                return;
+            }
+        }
+        
+        System.out.print("Enter The Student Name: ");
+        String name = scanner.nextLine();
+        
+        System.out.println("\nAvailable Courses:");
+        for (int i = 0; i < courses.size(); i++) {
+            System.out.println((i+1) + ". " + courses.get(i));
+        }
+        System.out.print("Select course number: ");
+        int courseChoice = Integer.parseInt(scanner.nextLine()) - 1;
+        
+        if (courseChoice < 0 || courseChoice >= courses.size()) {
+            System.out.println("Invalid entered course choice!");
+            return;
+        }
+        
+        String selectedCourse = courses.get(courseChoice).getTitle();
+        
+        System.out.print("Enter The Marks (0-100): ");
+        double marks = Double.parseDouble(scanner.nextLine());
+        
+        if (marks < 0 || marks > 100) {
+            System.out.println("Marks should be between 0-100!");
+            return;
+        }
+        
+        Student newStudent = new Student(id, name, selectedCourse, marks);
+        students.add(newStudent);
+        System.out.println("The Student is added successfully!");
+    }
+    
+    private void viewAllStudents() {
+        System.out.println("\n--- ALL STUDENTS ---");
+        if (students.isEmpty()) {
+            System.out.println("No students in the system.");
+            return;
+        }
+        
+        for (Student s : students) {
+            System.out.println(s);
+        }
+        
+        // Calculate class average
+        double total = 0;
+        for (Student s : students) {
+            total += s.getMarks();
+        }
+        double average = total / students.size();
+        System.out.println("\nClass Average: " + String.format("%.2f", average));
+        
+        System.out.print("\nPress Enter to continue...");
+        scanner.nextLine();
+    }
+    
+    private void searchStudent() {
+        System.out.print("\nEnter Student ID to search: ");
+        int searchId = Integer.parseInt(scanner.nextLine());
+        
+        for (Student s : students) {
+            if (s.getId() == searchId) {
+                System.out.println("\nStudent Found:");
+                System.out.println(s);
+                return;
+            }
+        }
+        System.out.println("Student not found!");
+    }
+    
+    private void updateMarks() {
+        System.out.print("\nEnter Student ID to update marks: ");
+        int updateId = Integer.parseInt(scanner.nextLine());
+        
+        for (Student s : students) {
+            if (s.getId() == updateId) {
+                System.out.println("Current details: " + s);
+                System.out.print("Enter new marks (0-100): ");
+                double newMarks = Double.parseDouble(scanner.nextLine());
+                
+                if (newMarks < 0 || newMarks > 100) {
+                    System.out.println("Invalid marks!");
+                    return;
+                }
+                
+                s.setMarks(newMarks);
+                System.out.println("Marks updated! New grade: " + s.getGrade());
+                return;
+            }
+        }
+        System.out.println("The student name entered  not found!");
+    }
+    
+    private void deleteStudent() {
+        System.out.print("\nEnter Student ID to delete: ");
+        int deleteId = Integer.parseInt(scanner.nextLine());
+        
+        for (int i = 0; i < students.size(); i++) {
+            if (students.get(i).getId() == deleteId) {
+                Student removed = students.remove(i);
+                System.out.println("Removed: " + removed.getName());
+                return;
+            }
+        }
+        System.out.println("Student not found!");
+    }
+    
+    private void showCourses() {
+        System.out.println("\n--- AVAILABLE COURSES ---");
+        for (Course c : courses) {
+            System.out.println(c);
+        }
+        System.out.print("\nPress Enter to continue...");
+        scanner.nextLine();
+    }
+    
+    public static void main(String[] args) {
+        Main system = new Main();
+        system.start();
+    }
+}
